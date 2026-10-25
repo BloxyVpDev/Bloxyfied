@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bloxyfied | Log In</title>
+<meta name="description" content="Bloxyfied - More than just a game. Make friends, trade and hold a community.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="nav">
+  <a class="brand" href="index.html"><span class="logo-mark">B<i>x</i></span><span>Bloxyfied</span></a>
+  <nav>
+    <a class="link active" href="index.html">Log In</a>
+    <a class="link" href="#" id="aboutBtn">About Site</a>
+    <a class="btn primary sm" href="shop.html" style="padding:12px 22px">👑 Subscription</a>
+  </nav>
+</header>
+
+<main class="hero">
+  <span class="cube" style="left:-30px;top:12%;width:150px;height:150px"></span>
+  <span class="cube" style="left:6%;top:48%;width:60px;height:60px;animation-delay:-2s"></span>
+  <span class="cube" style="right:-40px;top:6%;width:190px;height:190px;animation-delay:-4s"></span>
+  <span class="cube" style="right:8%;bottom:6%;width:80px;height:80px;animation-delay:-1s"></span>
+  <span class="cube" style="left:30%;bottom:-30px;width:120px;height:120px;animation-delay:-3s"></span>
+
+  <section class="hero-left">
+    <span class="logo-mark xl">B<i>x</i></span>
+    <h1>Bloxyfied</h1>
+    <p class="tag">More Than Just a Game.</p>
+    <div class="feats">
+      <div><b>👥</b>Make New<br>Friends</div>
+      <div><b>🔄</b>Trade<br>&nbsp;</div>
+      <div><b>🏘️</b>And Hold<br>Community</div>
+    </div>
+  </section>
+
+  <section class="card auth">
+    <h2 id="authTitle">Welcome Back!</h2>
+    <p class="sub" id="authSub">Log in to your Bloxyfied account</p>
+    <button class="google" id="googleBtn" type="button"><span class="g">G</span> Sign in with Google</button>
+    <div class="or">OR</div>
+    <form id="authForm" autocomplete="on">
+      <input class="field" id="username" placeholder="Username" autocomplete="username" maxlength="16" required>
+      <input class="field" id="password" type="password" placeholder="Password" autocomplete="current-password" required>
+      <input class="field" id="confirm" type="password" placeholder="Confirm password" autocomplete="new-password" style="display:none">
+      <div class="err" id="err"></div>
+      <button class="btn primary" id="submitBtn" type="submit">👤 Sign In</button>
+    </form>
+    <button class="btn outline" id="toggleBtn" type="button">＋ Create Account</button>
+  </section>
+</main>
+
+<script src="app.js"></script>
+<script>
+(function () {
+  if (Bx.current()) { location.replace('home.html'); return; }
+  const $ = id => document.getElementById(id);
+  let mode = 'login';
+
+  function setMode(m) {
+    mode = m; const reg = m === 'register';
+    $('authTitle').textContent = reg ? 'Join Bloxyfied!' : 'Welcome Back!';
+    $('authSub').textContent = reg ? 'Create your free Bloxyfied account' : 'Log in to your Bloxyfied account';
+    $('confirm').style.display = reg ? '' : 'none'; $('confirm').required = reg;
+    $('password').autocomplete = reg ? 'new-password' : 'current-password';
+    $('submitBtn').textContent = reg ? '✨ Create Account' : '👤 Sign In';
+    $('toggleBtn').textContent = reg ? '← Back to Log In' : '＋ Create Account';
+    $('err').textContent = '';
+  }
+  $('toggleBtn').onclick = () => setMode(mode === 'login' ? 'register' : 'login');
+
+  $('authForm').addEventListener('submit', async e => {
+    e.preventDefault(); $('err').textContent = ''; $('submitBtn').disabled = true;
+    try {
+      const u = $('username').value, p = $('password').value;
+      if (mode === 'register') {
+        if (p !== $('confirm').value) throw new Error('Passwords do not match.');
+        await Bx.register(u, p);
+      } else await Bx.login(u, p);
+      const next = new URLSearchParams(location.search).get('next');
+      location.href = ['home.html', 'shop.html'].includes(next) ? next : 'home.html';
+    } catch (err) { $('err').textContent = err.message; }
+    $('submitBtn').disabled = false;
+  });
+
+  $('googleBtn').onclick = () => Bx.toast('Google sign-in is not connected yet (test build). Use Create Account.');
+  $('aboutBtn').onclick = e => {
+    e.preventDefault();
+    const m = Bx.modal(`<h3>About Bloxyfied</h3>
+      <p>Bloxyfied is a community marketplace to make friends, trade, buy and sell items using <b>Bx</b>, the site currency.</p>
+      <p>⚠️ This is a <b>test build</b>: Bx is not real money, payments are simulated, and accounts are saved only in your own browser.</p>
+      <div class="row"><button class="btn primary" id="okAbout">Got it</button></div>`);
+    m.el.querySelector('#okAbout').onclick = m.close;
+  };
+  if (new URLSearchParams(location.search).get('next')) Bx.toast('Please log in first to continue.');
+})();
+</script>
+</body>
+</html>

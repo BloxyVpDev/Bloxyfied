@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bloxyfied | Buy Bx</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="shopnav">
+  <a class="brand" href="home.html"><span class="logo-mark">B<i>x</i></span><span>Bloxyfied</span></a>
+  <nav class="tabs">
+    <a class="tab" href="home.html">🏠 <span>Home</span></a>
+    <a class="tab on" href="#subscribe" id="tabSub">👑 <span>Subscription</span></a>
+    <a class="tab" href="#" id="tabProducts">📦 <span>My Products</span></a>
+  </nav>
+  <div class="userchip">
+    <button id="chip"><span class="avatar sm" id="chipAv">?</span><span id="chipName">Guest</span> ▾</button>
+    <div class="menu" id="menu"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="welcome">
+    <h2>Welcome to</h2>
+    <h1>Bloxyfied</h1>
+    <p>Get more Bx, unlock exclusive badges, and make your chat stand out with special effects!</p>
+    <div class="big">💎</div>
+    <div class="slogan">More Bx,<br>More Fun,<br>More You!</div>
+  </section>
+
+  <section class="shop-sec" id="currency">
+    <h3>🪙 Buy Currency</h3>
+    <p>Get Bx and unlock more in Bloxyfied!</p>
+    <div class="packs" id="packs"></div>
+  </section>
+
+  <section class="shop-sec" id="subscribe">
+    <h3>👑 Subscribe</h3>
+    <p>Choose your plan and get exclusive benefits!</p>
+    <div class="plans" id="plans"></div>
+  </section>
+
+  <section class="assure">
+    <div><span>⚡</span><span><b>Instant Delivery</b><small>Get your Bx right away</small></span></div>
+    <div><span>🛡️</span><span><b>Secure Payments</b><small>Safe &amp; trusted</small></span></div>
+    <div><span>💬</span><span><b>Exclusive Badges</b><small>Show your style</small></span></div>
+    <div><span>👑</span><span><b>Premium Experience</b><small>For true Bloxyfied players</small></span></div>
+  </section>
+  <p class="muted" style="text-align:center;font-size:.8rem">🧪 Test mode: payments are simulated and no real money is charged.</p>
+</div>
+
+<script src="app.js"></script>
+<script>
+(function () {
+  const $ = s => document.querySelector(s);
+  let me = Bx.current();
+
+  /* ---------- user chip ---------- */
+  function renderChip() {
+    me = Bx.current();
+    if (me) {
+      $('#chipAv').textContent = me.username[0].toUpperCase();
+      $('#chipName').innerHTML = Bx.esc(me.username) + Bx.badge(me);
+      $('#menu').innerHTML = `<div class="who">🪙 ${Bx.fmt(me.bx)} BX</div><a href="home.html">🏠 Home</a><button id="lo">🚪 Log out</button>`;
+      $('#lo').onclick = Bx.logout;
+    } else {
+      $('#menu').innerHTML = '<a href="index.html?next=shop.html">🔑 Log in</a><a href="index.html?next=shop.html">✨ Create account</a>';
+    }
+  }
+  $('#chip').onclick = e => { e.stopPropagation(); $('#menu').classList.toggle('open'); };
+  document.addEventListener('click', () => $('#menu').classList.remove('open'));
+
+  /* ---------- test checkout ---------- */
+  function needLogin() {
+    Bx.toast('Please log in to continue.', 'bad'); setTimeout(() => location.href = 'index.html?next=shop.html', 1000);
+  }
+  function checkout(title, priceText, onConfirm) {
+    if (!me) return needLogin();
+    const m = Bx.modal(`<h3>Checkout</h3><div class="testbanner">🧪 TEST MODE - no real payment is taken</div>
+      <div class="list-line"><span>${title}</span><b>${priceText}</b></div>
+      <div class="list-line"><span>Account</span><b>${Bx.esc(me.username)}</b></div>
+      <div class="row"><button class="btn outline" id="no">Cancel</button><button class="btn primary" id="yes">Confirm test purchase</button></div>`);
+    m.el.querySelector('#no').onclick = m.close;
+    m.el.querySelector('#yes').onclick = () => {
+      try { onConfirm(); m.close(); renderChip(); renderPlans(); } catch (err) { Bx.toast(err.message, 'bad'); m.close(); }
+    };
+  }
+
+  /* ---------- currency packs ---------- */
+  const PACKS = [{ bx: 500, price: 1, n: 1 }, { bx: 1000, price: 10, n: 3 }, { bx: 1500, price: 15, n: 5 }, { bx: 5000, price: 30, n: 8 }];
+  $('#packs').innerHTML = PACKS.map((p, i) => `<div class="pack">
+      <div class="coins" style="font-size:${28 + p.n * 4}px">${'🪙'.repeat(Math.min(p.n, 4))}</div>
+      <b>${Bx.fmt(p.bx)} Bx</b>
+      <div class="pp"><span class="bxcoin">BX</span>$${p.price}</div>
+      <button class="btn primary block" data-pack="${i}">🛒 Buy Now</button></div>`).join('');
+  $('#packs').addEventListener('click', e => {
+    const b = e.target.closest('[data-pack]'); if (!b) return;
+    const p = PACKS[+b.dataset.pack];
+    checkout(Bx.fmt(p.bx) + ' Bx', '$' + p.price, () => { Bx.addBx(p.bx); Bx.toast('+' + Bx.fmt(p.bx) + ' Bx added to your balance!', 'ok'); });
+  });
+
+  /* ---------- subscriptions ---------- */
+  const PERKS = {
+    basic: ['10 Bx per day', 'Purple Basic Badge', '(Little check in the name)', 'Special chat effect'],
+    premium: ['50 Bx per day', 'Purple Premium badge', '(Little golden check in the name)', 'Premium glowing chat effect'],
+    overlord: ['150 Bx per day', 'Purple Overlord badge', '(Flaming red check in the name)', 'Overlord Premium flaming golden purple chat effect']
+  };
+  const ICON = { basic: '🛡️', premium: '🏅', overlord: '🔥' };
+  function renderPlans() {
+    me = Bx.current(); const active = Bx.activePlan(me);
+    const html = Object.values(Bx.PLANS).map(p => {
+      const cur = active && active.key === p.key;
+      const pk = PERKS[p.key];
+      return `<div class="plan" style="--c:${p.color}">
+        <header><span>${p.name}</span><span class="shield">${ICON[p.key]}</span></header>
+        <span class="price">$${p.price} / ${p.per}</span>
+        <ul><li>🪙 <b>${pk[0]}</b></li><li>✅ ${pk[1]}<small>${pk[2]}</small></li><li>💬 ${pk[3]}</li></ul>
+        <button class="btn primary block" data-plan="${p.key}" ${cur ? 'disabled' : ''}>${cur ? '✔ Current plan' : '👑 Subscribe'}</button></div>`;
+    }).join('');
+    const trialUsed = me && me.trialUsed;
+    $('#plans').innerHTML = html + `<div class="plan trial"><div class="gift">🎁</div><b style="font-size:1.5rem">Free Trial</b>
+      <p class="muted" style="font-size:.9rem">Try Purple Premium free for 3 days.<br>No commitment!</p>
+      <button class="btn primary block" id="trialBtn" ${trialUsed ? 'disabled' : ''}>${trialUsed ? 'Trial used' : 'Start Free Trial ›'}</button></div>`;
+  }
+  $('#plans').addEventListener('click', e => {
+    const b = e.target.closest('[data-plan]');
+    if (b) {
+      const p = Bx.PLANS[b.dataset.plan];
+      return checkout(p.name, '$' + p.price + ' / ' + p.per, () => { Bx.subscribe(p.key); Bx.toast(p.name + ' activated! First daily Bx credited.', 'ok'); });
+    }
+    if (e.target.closest('#trialBtn')) {
+      if (!me) return needLogin();
+      try { Bx.subscribe('premium', true); Bx.toast('Free trial started! Enjoy Purple Premium for 3 days.', 'ok'); renderChip(); renderPlans(); }
+      catch (err) { Bx.toast(err.message, 'bad'); }
+    }
+  });
+
+  /* ---------- my products ---------- */
+  $('#tabProducts').onclick = e => {
+    e.preventDefault(); if (!me) return needLogin();
+    const mine = Bx.listings().filter(l => l.seller === me.username);
+    const owned = me.inventory.map(i => `<div class="list-line"><span>${i.icon} ${Bx.esc(i.name)}</span><b>${Bx.fmt(i.price)} BX</b></div>`).join('') || '<p class="muted">You do not own any items yet.</p>';
+    const listed = mine.map(i => `<div class="list-line"><span>${i.icon} ${Bx.esc(i.name)}</span><b>${Bx.fmt(i.price)} BX</b></div>`).join('') || '<p class="muted">You have no listings. Add one from Home.</p>';
+    const m = Bx.modal(`<h3>📦 My Products</h3><b>Owned items</b>${owned}<br><b>Your listings</b>${listed}
+      <div class="row"><button class="btn primary" id="ok">Close</button></div>`);
+    m.el.querySelector('#ok').onclick = m.close;
+  };
+
+  renderChip(); renderPlans();
+})();
+</script>
+</body>
+</html>
